@@ -19,6 +19,16 @@ var twitterCred = {
 
 module.exports = {
     redirectLogin: function (req, res) {
-        res.send("This is a send"); //This would send to the webpage
+        oauth.getOAuthRequestToken(function (err, oauth_token, oauth_token_secret, results) { 
+            //Method that recives the request token
+            if (err) {
+                console.log(err);
+                res.send("There was an error trying to process your request, please try again at a later date");
+            } else{
+                twitterCred.oauth_token = oauth_token;
+                twitterCred.oauth_token_secret = oauth_token_secret;
+                res.send("Credentials stored!");
+            }
+        })
     }
 }
