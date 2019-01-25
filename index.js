@@ -6,6 +6,7 @@
 
 var express = require('express');
 var app = express();
+var auth = require('./auth.js');
 var config = require('./config.json'); //Including the JSON file
 var url = require('url');
 
@@ -15,6 +16,8 @@ app.use(require('cookie-parser')());
 app.get('/', function (req, res) {
     res.send("<h3>Hello world</h3>"); //Sends the message in a h3
 });
+
+app.get('/auth/twitter', auth.redirectLogin); //auth is the file, redirectLogin is the thing being exported from the file
 
 //Building a server to listen on port 8080
 app.listen(config.port, function () {

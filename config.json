@@ -6,6 +6,6 @@
     "consumer_key": "wyWojIPqQZrP5bEjagwDsxNfJ",
     "consumer_secret": "btCUsQHz9iwvw5qomsmi8fTSB8Xx4RipMMoC2aFT7eat44pUbe",
     "oauth_version": "1.0",
-    "oauth_signature": "HMAC-SHAI",
+    "oauth_signature": "HMAC-SHA1",
     "oauth_callback": "https://www.example.com/callback"
 }
