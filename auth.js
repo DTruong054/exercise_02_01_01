@@ -27,7 +27,9 @@ module.exports = {
             } else{
                 twitterCred.oauth_token = oauth_token;
                 twitterCred.oauth_token_secret = oauth_token_secret;
-                res.send("Credentials stored!");
+                // res.send("Credentials stored!");
+                res.redirect(config.authorize_url + '?oauth_token=' + oauth_token);
+                //This would redirect to another page
             }
         })
     }
