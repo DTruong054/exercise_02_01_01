@@ -32,5 +32,24 @@ module.exports = {
                 //This would redirect to another page
             }
         })
+    },
+    authenticate: function (req, res, callback) {
+        if (!(twitterCred.oauth_token && twitterCred.oauth_token_secret && req.query.oauth_verifier)) {
+            return callback("Request doesn't have all keys nessesary"); 
+        }
+        // twitterCred.oauth_token = ""; //Wipes the oauth_token
+        // twitterCred.oauth_token_secret = ""; //wipes the token secret
+        oauth.getOAuthAccessToken(twitterCred.oauth_token, twitterCred.oauth_token_secret, req.query.oauth_verifier, function (err, oauth_access_token, oauth_access_token_secret, results) {
+            if (err) {
+                return callback(err);
+            }
+            //Error at 1.1/account
+            oauth.get('htpps://api.twitter.com/1.1/account/verify_credentials.json', oauth_access_token, oauth_token_secret, function (err, data) {
+                if (err) {
+                    console.log(err);
+                    return callback(err);
+                }
+            });
+        })
     }
 }

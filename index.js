@@ -17,13 +17,22 @@ app.get('/', function (req, res) {
     res.send("<h3>Hello world</h3>"); //Sends the message in a h3
 });
 
-// app.get('/auth/twitter', function (req, res) {
-//     res.send("<h3>Hello I am a oauth callback</h3>"); //This will send once the page says /auth/twitter
-// })
-
 app.get('/auth/twitter', auth.redirectLogin); //auth is the file, redirectLogin is the thing being exported from the file
+
+app.get(url.parse(config.oauth_callback).path, function (req, res) {
+    auth.authenticate(req, res, function (err) { 
+        //This grabs the auth file and the authenticate function within the file
+        if (err) {
+            console.log(err);
+            res.sendStatus(401);
+        } else {
+            res.send("Authentication Successful")
+        }
+    })
+})
 
 //Building a server to listen on port 8080
 app.listen(config.port, function () {
     console.log("Server is listening on localhost port:%s", config.port);
+    console.log("Oauth callback: " + url.parse(config.oauth_callback).hostname + url.parse(config.oauth_callback).path);
 });
