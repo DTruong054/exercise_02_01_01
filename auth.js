@@ -25,10 +25,10 @@ module.exports = {
         return twitterCred;
     },
     get: function (url, access_token, access_token_secret, callback) { //The target API is "url"
-        oauth.call.get(oauth, url, access_token, access_token_secret, callback);
+        oauth.get.call(oauth, url, access_token, access_token_secret, callback);
     },
     post: function (url, access_token, access_token_secret, body, callback) {
-        oauth.call.post(oauth, url, access_token, access_token_secret, body, callback);
+        oauth.post.call(oauth, url, access_token, access_token_secret, body, callback);
     },
     redirectLogin: function (req, res) {
         oauth.getOAuthRequestToken(function (err, oauth_token, oauth_token_secret, results) {
