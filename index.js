@@ -19,8 +19,16 @@ app.get('/', function (req, res) {
 
 app.get('/auth/twitter', auth.redirectLogin); //auth is the file, redirectLogin is the thing being exported from the file
 
+app.get('/tweet', function (req, res) {
+    var credentials = auth.getCredentials();
+    if (!credentials.access_token || !credentials.access_token_secret) {
+        return res.send(418);
+    }
+    res.sendStatus(200);
+})
+
 app.get(url.parse(config.oauth_callback).path, function (req, res) {
-    auth.authenticate(req, res, function (err) { 
+    auth.authenticate(req, res, function (err) {
         //This grabs the auth file and the authenticate function within the file
         if (err) {
             console.log(err);

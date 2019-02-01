@@ -14,17 +14,29 @@ var oauth = new OAuth(
 
 var twitterCred = {
     oauth_token: "",
-    oauth_token_secret: ""
+    oauth_token_secret: "",
+    access_token: "",
+    access_token_secret: "",
+    twitter_id: ""
 }
 
 module.exports = {
+    getCredentials: function () {
+        return twitterCred;
+    },
+    get: function (url, access_token, access_token_secret, callback) { //The target API is "url"
+        oauth.call.get(oauth, url, access_token, access_token_secret, callback);
+    },
+    post: function (url, access_token, access_token_secret, body, callback) {
+        oauth.call.post(oauth, url, access_token, access_token_secret, body, callback);
+    },
     redirectLogin: function (req, res) {
-        oauth.getOAuthRequestToken(function (err, oauth_token, oauth_token_secret, results) { 
+        oauth.getOAuthRequestToken(function (err, oauth_token, oauth_token_secret, results) {
             //Method that recives the request token
             if (err) {
                 console.log(err);
                 res.send("There was an error trying to process your request, please try again at a later date");
-            } else{
+            } else {
                 twitterCred.oauth_token = oauth_token;
                 twitterCred.oauth_token_secret = oauth_token_secret;
                 // res.send("Credentials stored!");
@@ -35,7 +47,7 @@ module.exports = {
     },
     authenticate: function (req, res, callback) {
         if (!(twitterCred.oauth_token && twitterCred.oauth_token_secret && req.query.oauth_verifier)) {
-            return callback("Request doesn't have all keys nessesary"); 
+            return callback("Request doesn't have all keys nessesary");
         }
         // twitterCred.oauth_token = ""; //Wipes the oauth_token
         // twitterCred.oauth_token_secret = ""; //wipes the token secret
@@ -43,12 +55,18 @@ module.exports = {
             if (err) {
                 return callback(err);
             }
-            //Error at 1.1/account
-            oauth.get('htpps://api.twitter.com/1.1/account/verify_credentials.json', oauth_access_token, oauth_token_secret, function (err, data) {
+
+            oauth.get('https://api.twitter.com/1.1/account/verify_credentials.json', oauth_access_token, oauth_access_token_secret, function (err, data) {
                 if (err) {
                     console.log(err);
                     return callback(err);
                 }
+                data = JSON.parse(data);
+                twitterCred.access_token = oauth_access_token;
+                twitterCred.access_token_secret = oauth_access_token_secret;
+                twitterCred.twitter_id = data.id_str;
+                console.log(data);
+                return callback();
             });
         })
     }
