@@ -32,7 +32,7 @@ module.exports = {
     },
     redirectLogin: function (req, res) {
         oauth.getOAuthRequestToken(function (err, oauth_token, oauth_token_secret, results) {
-            //Method that recives the request token
+            //Method that gets the request token
             if (err) {
                 console.log(err);
                 res.send("There was an error trying to process your request, please try again at a later date");

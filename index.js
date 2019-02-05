@@ -10,6 +10,7 @@ var auth = require('./auth.js');
 var config = require('./config.json'); //Including the JSON file
 var url = require('url');
 var queryString = require('querystring');
+var async = require('async');
 
 //The "app.use" need a function. The require('cookie-parser') fills in for the function, and the () after are needed for parameteres. 
 app.use(require('cookie-parser')());
@@ -60,11 +61,68 @@ app.get('/friends', function (req, res) {
     if (!credentials.access_token || !credentials.access_token_secret) {
         return res.sendStatus(418);
     }
+    var url = "https://api.twitter.com/1.1/friends/list.json"
+    if(req.query.cursor) {
+        url += '?' + queryString.stringify({ cursor: req.query.cursor })
+    }
+    authenticator.get(url, credentials.access_token, credentials.access_token_secret, function(err, data) {
+        if(err) {
+            return res.status(400).send(err);
+        }
+        res.send(data);
+    });
+});
+
+app.get('/allfriends', function(req, res) {
+    var credentials = auth.getCredentials();
+    async.waterfall([
+        // Grabbing friend's ID
+        function (callback) {
+            var cursor = -1;
+            var ids = [];
+            console.log("ids.length: " + ids.length);
+            async.whilst(function() {
+                return cursor != 0;
+            },
+            function(callback) {
+                var url = "https://api.twitter.com/1.1/friends/ids.json";
+                url += "?" + queryString.stringify({ user_id: credentials.twitter_id, cursor: cursor});
+                auth.get(url, credentials.access_token, credentials.access_token_secret, function(err, data) {
+                    if(err) {
+                        return res.status(400).send(err);
+                    }
+                    data = JSON.parse(data);
+                    cursor = data.next_cursor_str;
+                    ids = ids.concat(data.ids);
+                    console.log("ids.length: " + ids.length)
+                    callback();
+                });
+            });
+        },
+        function (err) {
+            console.log('last callback');
+            if (err) {
+                return res.status(500).send(err);
+            }
+            console.log(ids);
+            callback(null, ids);
+            
+        },
+
+        // Search friends data
+        function (ids, callback) {
+            var getHundredsIds = function (i) {
+                return ids.slice(100*i, Math.min(ids.length, 100*(i+1)));
+            };
+            var requestsNeeded = Math.ceil(ids.length/100);
+        }
+    ]);
+    res.sendStatus(200);
 });
 
 app.get(url.parse(config.oauth_callback).path, function (req, res) {
     auth.authenticate(req, res, function (err) {
-        //This grabs the auth file and the authenticate function within the file
+        // Gets Authenticate function
         if (err) {
             console.log(err);
             res.sendStatus(401);
@@ -75,12 +133,12 @@ app.get(url.parse(config.oauth_callback).path, function (req, res) {
         if (req.query.cursor) {
             
         }
-        auth.get(url, credentials.access_token, credentials.access_token_secret, function (err, data) {
-            if (err) {
-                return res.status(400).send(err);
-            }
-            res.send(data);
-        });
+        // auth.get(url, credentials.access_token, credentials.access_token_secret, function (err, data) {
+        //     if (err) {
+        //         return res.status(400).send(err);
+        //     }
+        //     res.send(data);
+        // });
     })
 })
 
