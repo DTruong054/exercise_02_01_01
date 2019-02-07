@@ -12,7 +12,7 @@ var url = require('url');
 var queryString = require('querystring');
 var async = require('async');
 
-//The "app.use" need a function. The require('cookie-parser') fills in for the function, and the () after are needed for parameteres. 
+//The "app.use" need a function. The require('cookie-parser') fills in for the function, and the () after are needed for parameters. 
 app.use(require('cookie-parser')());
 
 app.get('/', function (req, res) {
@@ -102,19 +102,40 @@ app.get('/allfriends', function(req, res) {
         function (err) {
             console.log('last callback');
             if (err) {
-                return res.status(500).send(err);
+                return res.status(400).send(err);
             }
             console.log(ids);
             callback(null, ids);
-            
         },
 
         // Search friends data
         function (ids, callback) {
             var getHundredsIds = function (i) {
-                return ids.slice(100*i, Math.min(ids.length, 100*(i+1)));
+                //Count control loop
+                return ids.slice(100*i, Math.min(ids.length, 100*(i+1))); //This grabs the number of friends and divides by 100, then rounds up the number.
             };
             var requestsNeeded = Math.ceil(ids.length/100);
+            async.times(requestsNeeded, function (n, next) {
+                var url = "https://api.twitter.com/1.1/users/lookup.json";
+                //Calling the api
+                url += "?" + queryString.stringify({ user_id: getHundredsIds(n).join(',') });
+                auth.get(url, credentials.access_token, credentials.access_token_secret, function (err, data) {
+                    if (err) {
+                        return res.status(500).send(err);
+                    }
+                    console.log("n: ", n ,data);
+                    friends.reduce(function (prev, curr, currIndex, array) { //previous and current shortened
+                        return prev.concat(curr); //Concat = concatenate
+                    }, [] );
+
+                    //Sorts the friends name in order
+                    freinds.sort(function (a, b) {
+                        return a.name.lowerCase().localCompare(b.name.toLowercase());
+                    });
+                    res.send(friends);
+                    console.log("ids.length: ", ids.length);
+                });
+            });
         }
     ]);
     res.sendStatus(200);
@@ -130,9 +151,9 @@ app.get(url.parse(config.oauth_callback).path, function (req, res) {
             res.send("Authentication Successful")
         }
         var url = "https://api.twitter.com/1.1/friends/list.json";
-        if (req.query.cursor) {
+        // if (req.query.cursor) {
             
-        }
+        // }
         // auth.get(url, credentials.access_token, credentials.access_token_secret, function (err, data) {
         //     if (err) {
         //         return res.status(400).send(err);
