@@ -1,3 +1,9 @@
+/**
+ * Name: Daniel Truong
+ * Date: 1.17.19
+ * FileName: index.js
+ */
+
 var express = require('express');
 var app = express();
 var authenticator = require('./auth.js');
@@ -6,17 +12,19 @@ var url = require('url');
 var querystring = require('querystring');
 var async = require('async');
 
+//The "app.use" need a function. The require('cookie-parser') fills in for the function, and the () after are needed for parameters.
 app.use(require('cookie-parser')());
 
 app.get('/', function(req, res) {
-    res.send("<h3>Hello, world!</h3>");
+    res.send("<h3>Hello, world!</h3>"); //Sends the message in a h3
 });
 
-app.get('/auth/twitter', authenticator.redirectLogin); 
+app.get('/auth/twitter', authenticator.redirectLogin); //auth is the file, redirectLogin is the thing being exported from the file
 
 app.get(url.parse(config.oauth_callback).path, function(req, res) {
     authenticator.authenticate(req, res, function(err) {
         if (err) {
+            //chaining
             console.log(err);
             res.sendStatus(401);
         }
@@ -120,7 +128,8 @@ app.get('/allfriends', function(req, res) {
         // lookup friends data
         function(ids, callback) {
             var getHundredIds = function(i) {
-                return ids.slice(100*i, Math.min(ids.length, 100*(i+1)));
+                //Count control loop
+                return ids.slice(100 * i, Math.min(ids.length, 100 * (i + 1))); //This grabs the number of friends and divides by 100, then rounds up the number.
             };
             var requestsNeeded = Math.ceil(ids.length/100);
             async.times(requestsNeeded, function(n, next) {
@@ -137,9 +146,10 @@ app.get('/allfriends', function(req, res) {
                 });
             }, 
             function(error, friends) {
-                friends = friends.reduce(function(previousValue, currentValue, currentIndex, array) {
+                friends = friends.reduce(function (previousValue, currentValue, currentIndex, array) { //previous and current shortened
                     return previousValue.concat(currentValue);
                 }, []);
+                //Sorts the friends name in order
                 friends.sort(function(a, b) {
                     return a.name.toLowerCase().localeCompare(b.name.toLowerCase())
                 });
